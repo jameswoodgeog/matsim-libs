@@ -47,15 +47,9 @@ class BicycleTravelDisutility implements TravelDisutility {
 	private final double marginalCostOfInfrastructure_m;
 	private final double marginalCostOfComfort_m;
 	private final double marginalCostOfGradient_m_100m;
-	private final double marginalCostOfUserDefinedNetworkAttribute_m;
-	private final String nameOfUserDefinedNetworkAttribute;
-	private final double userDefinedNetworkAttributeDefaultValue;
-
 	private final double normalization;
 	private final double sigma;
-
 	private final Random random;
-
 	private final TravelTime timeCalculator;
 
 	// "cache" of the random value
@@ -64,7 +58,6 @@ class BicycleTravelDisutility implements TravelDisutility {
 	private double logNormalRndInf;
 	private double logNormalRndComf;
 	private double logNormalRndGrad;
-	private double logNormalRndUserDef;
 	private Person prevPerson;
 
 
@@ -83,9 +76,7 @@ class BicycleTravelDisutility implements TravelDisutility {
 		this.marginalCostOfInfrastructure_m = -(bicycleConfigGroup.getMarginalUtilityOfInfrastructure_m());
 		this.marginalCostOfComfort_m = -(bicycleConfigGroup.getMarginalUtilityOfComfort_m());
 		this.marginalCostOfGradient_m_100m = -(bicycleConfigGroup.getMarginalUtilityOfGradient_pct_m());
-		this.marginalCostOfUserDefinedNetworkAttribute_m = -(bicycleConfigGroup.getMarginalUtilityOfUserDefinedNetworkAttribute_m());
-		this.nameOfUserDefinedNetworkAttribute = bicycleConfigGroup.getUserDefinedNetworkAttributeName();
-		this.userDefinedNetworkAttributeDefaultValue = bicycleConfigGroup.getUserDefinedNetworkAttributeDefaultValue();
+
 
 		this.timeCalculator = timeCalculator;
 
@@ -115,13 +106,7 @@ class BicycleTravelDisutility implements TravelDisutility {
 		double gradientFactor = bicycleParams.getGradient_pct(link );
 		double gradientDisutility = marginalCostOfGradient_m_100m * gradientFactor * distance;
 
-		double userDefinedNetworkAttritubeDisutility = 0.;
-		if (nameOfUserDefinedNetworkAttribute != null) {
-			String userDefinedNetworkAttributeString = BicycleUtils.getUserDefinedNetworkAttribute(link, nameOfUserDefinedNetworkAttribute);
-			double userDefinedNetworkAttributeFactor = BicycleUtils.getUserDefinedNetworkAttributeFactor(userDefinedNetworkAttributeString,
-					this.userDefinedNetworkAttributeDefaultValue );
-			userDefinedNetworkAttritubeDisutility = marginalCostOfUserDefinedNetworkAttribute_m * (1. - userDefinedNetworkAttributeFactor) * distance;
-		}
+
 
 //		LOG.warn("link = " + link.getId() + "-- travelTime = " + travelTime + " -- distance = " + distance + " -- comfortFactor = "
 //				+ comfortFactor	+ " -- infraFactor = "+ infrastructureFactor + " -- gradient = " + gradientFactor);
@@ -150,12 +135,10 @@ class BicycleTravelDisutility implements TravelDisutility {
 				logNormalRndInf = Math.exp(sigma * random.nextGaussian());
 				logNormalRndComf = Math.exp(sigma * random.nextGaussian());
 				logNormalRndGrad = Math.exp(sigma * random.nextGaussian());
-				logNormalRndUserDef = Math.exp(sigma * random.nextGaussian());
 				logNormalRndDist *= normalization;
 				logNormalRndInf *= normalization;
 				logNormalRndComf *= normalization;
 				logNormalRndGrad *= normalization;
-				logNormalRndUserDef *= normalization;
 				// this should be a log-normal distribution with sigma as the "width" parameter.   Instead of figuring out the "location"
 				// parameter mu, I rather just normalize (which should be the same, see next). kai, nov'13
 
@@ -173,14 +156,13 @@ class BicycleTravelDisutility implements TravelDisutility {
 			logNormalRndInf = 1.;
 			logNormalRndComf = 1.;
 			logNormalRndGrad = 1.;
-			logNormalRndUserDef = 1.;
 		}
 
 //		LOG.warn("Person = " + person.getId() + " / link = " + link.getId() + " / ttD = " + travelTimeDisutility	+ " / dD = "+ distanceDisutility
 //				+ " / infD = " + infrastructureDisutility + " / comfD = " + comfortDisutility + " / gradD = " + gradientDisutility + " / rnd = " + normalRndLink
 //				+ " / rndDist = " + logNormalRndDist + " / rndInf = "	+ logNormalRndInf + " / rndComf = " + logNormalRndComf + " / rndGrad = " + logNormalRndGrad);
 		double disutility = (1 + normalRndLink) * travelTimeDisutility + logNormalRndDist * distanceDisutility + logNormalRndInf * infrastructureDisutility
-				+ logNormalRndComf * comfortDisutility + logNormalRndGrad * gradientDisutility + logNormalRndUserDef * userDefinedNetworkAttritubeDisutility;
+				+ logNormalRndComf * comfortDisutility + logNormalRndGrad * gradientDisutility;
 		// note that "normalRndLink" follows a Gaussian distribution, not a lognormal one as the others do!
 //		double disutility = travelTimeDisutility + logNormalRndDist * distanceDisutility + (1 + normalRndLink) * logNormalRndInf * infrastructureDisutility
 //				+ (1 + normalRndLink) * logNormalRndComf * comfortDisutility + (1 + normalRndLink) * logNormalRndGrad * gradientDisutility;
