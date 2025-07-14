@@ -21,6 +21,7 @@ package org.matsim.contrib.bicycle.run;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -425,34 +426,44 @@ public class BicycleTest {
 //		assertTrue("Populations are different", PopulationUtils.equalPopulation(scenarioReference.getPopulation(), scenarioCurrent.getPopulation()));
 	}
 
-//	@Test public void testMotorizedInteraction() {
-////		Config config = ConfigUtils.createConfig("./src/main/resources/bicycle_example/");
-//		Config config = createConfig( 10 );
-//
-//		// Activate link-based scoring
-//		BicycleConfigGroup bicycleConfigGroup = (BicycleConfigGroup) config.getModules().get("bicycle");
-////		bicycleConfigGroup.setBicycleScoringType(BicycleScoringType.linkBased);
-//
-//		// Interaction with motor vehicles
-//		new RunBicycleExample().run(config );
-//
-//		LOG.info("Checking MATSim events file ...");
-//		final String eventsFilenameReference = utils.getInputDirectory() + "output_events.xml.gz";
-//		final String eventsFilenameNew = utils.getOutputDirectory() + "output_events.xml.gz";
-//		assertEquals("Different event files.", FILES_ARE_EQUAL,
-//				new EventsFileComparator().setIgnoringCoordinates( true ).runComparison(eventsFilenameReference, eventsFilenameNew));
-//
-//		Scenario scenarioReference = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-//		Scenario scenarioCurrent = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-//		new PopulationReader(scenarioReference).readFile(utils.getInputDirectory() + "output_plans.xml.gz");
-//		new PopulationReader(scenarioCurrent).readFile(utils.getOutputDirectory() + "output_plans.xml.gz");
-//		for (Id<Person> personId : scenarioReference.getPopulation().getPersons().keySet()) {
-//			double scoreReference = scenarioReference.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
-//			double scoreCurrent = scenarioCurrent.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
-//			Assert.assertEquals("Scores of persons " + personId + " are different", scoreReference, scoreCurrent, MatsimTestUtils.EPSILON);
-//		}
-//		assertTrue("Populations are different", PopulationUtils.equalPopulation(scenarioReference.getPopulation(), scenarioCurrent.getPopulation()));
-//	}
+	/**
+	 * This test is disabled because this feature is not supported.
+	 */
+	@Disabled
+	@Test public void testMotorizedInteraction() {
+//		Config config = ConfigUtils.createConfig("./src/main/resources/bicycle_example/");
+		Config config = createConfig( 10 );
+
+		// Activate link-based scoring
+		BicycleConfigGroup bicycleConfigGroup = (BicycleConfigGroup) config.getModules().get("bicycle");
+//		bicycleConfigGroup.setBicycleScoringType(BicycleScoringType.linkBased);
+
+		// Interaction with motor vehicles
+		new RunBicycleExample().run(config );
+
+		LOG.info("Checking MATSim events file ...");
+		final String eventsFilenameReference = utils.getInputDirectory() + "output_events.xml.gz";
+		final String eventsFilenameNew = utils.getOutputDirectory() + "output_events.xml.gz";
+
+		assertEquals( FILES_ARE_EQUAL,
+			new EventsFileComparator().setIgnoringCoordinates( true ).runComparison( eventsFilenameReference, eventsFilenameNew ),
+			"Different event files.");
+
+		Scenario scenarioReference = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		Scenario scenarioCurrent = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		new PopulationReader(scenarioReference).readFile(utils.getInputDirectory() + "output_plans.xml.gz");
+		new PopulationReader(scenarioCurrent).readFile(utils.getOutputDirectory() + "output_plans.xml.gz");
+		for (Id<Person> personId : scenarioReference.getPopulation().getPersons().keySet()) {
+			double scoreReference = scenarioReference.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+			double scoreCurrent = scenarioCurrent.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+			//Assertions.("Scores of persons " + personId + " are different", scoreReference, scoreCurrent, MatsimTestUtils.EPSILON);
+			Assertions.assertEquals(scoreReference, scoreCurrent, MatsimTestUtils.EPSILON, "Scores of person=" + personId + " are different");
+
+		}
+
+		assertTrue(PopulationUtils.equalPopulation(scenarioReference.getPopulation(), scenarioCurrent.getPopulation()), "Populations are different");
+
+	}
 
 	@Test
 	void testInfrastructureSpeedFactor() {
