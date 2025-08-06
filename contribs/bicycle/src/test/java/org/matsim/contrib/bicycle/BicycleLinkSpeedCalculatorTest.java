@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BicycleLinkSpeedCalculatorTest {
     @RegisterExtension
 	public MatsimTestUtils utils = new MatsimTestUtils();
-    private static final double MAX_BICYCLE_SPEED = 15;
+    //private static final double MAX_BICYCLE_SPEED = 15;
 
     private final Config config = ConfigUtils.createConfig();
     private BicycleConfigGroup bicycleConfigGroup;
